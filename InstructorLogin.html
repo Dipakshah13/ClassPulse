@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Instructor Login | ClassPulse</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "surface-dim": "#060e20",
+                        "on-background": "#dee5ff",
+                        "primary": "#a3a6ff",
+                        "tertiary-dim": "#9c48ea",
+                        "on-secondary": "#005c52",
+                        "surface-container-low": "#091328",
+                        "surface-container-high": "#141f38",
+                        "error-container": "#a70138",
+                        "on-secondary-container": "#dcfff7",
+                        "tertiary-container": "#af5cfe",
+                        "on-secondary-fixed-variant": "#00675c",
+                        "error-dim": "#d73357",
+                        "tertiary-fixed-dim": "#c488ff",
+                        "primary-dim": "#6063ee",
+                        "outline-variant": "#40485d",
+                        "on-primary": "#0f00a4",
+                        "on-error-container": "#ffb2b9",
+                        "secondary-fixed-dim": "#50ebd5",
+                        "secondary-container": "#006b5f",
+                        "primary-fixed": "#9396ff",
+                        "on-primary-fixed-variant": "#0e009d",
+                        "on-secondary-fixed": "#004840",
+                        "on-tertiary-container": "#000000",
+                        "surface": "#060e20",
+                        "on-primary-container": "#0a0081",
+                        "surface-bright": "#1f2b49",
+                        "inverse-surface": "#faf8ff",
+                        "inverse-on-surface": "#4d556b",
+                        "primary-fixed-dim": "#8387ff",
+                        "on-surface": "#dee5ff",
+                        "surface-tint": "#a3a6ff",
+                        "error": "#ff6e84",
+                        "background": "#060e20",
+                        "on-primary-fixed": "#000000",
+                        "outline": "#6d758c",
+                        "on-surface-variant": "#a3aac4",
+                        "surface-container": "#0f1930",
+                        "tertiary-fixed": "#ce9bff",
+                        "surface-container-lowest": "#000000",
+                        "on-tertiary": "#33005b",
+                        "secondary-fixed": "#62fae3",
+                        "on-tertiary-fixed-variant": "#560094",
+                        "secondary-dim": "#50ebd5",
+                        "secondary": "#62fae3",
+                        "primary-container": "#9396ff",
+                        "on-tertiary-fixed": "#270048",
+                        "surface-container-highest": "#192540",
+                        "tertiary": "#c180ff",
+                        "inverse-primary": "#494bd7",
+                        "surface-variant": "#192540",
+                        "on-error": "#490013"
+                    },
+                    fontFamily: {
+                        "headline": ["Plus Jakarta Sans"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    },
+                    borderRadius: { "DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            background-color: #060e20;
+            overflow: hidden;
+        }
+        .mesh-gradient {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: 
+                radial-gradient(circle at 10% 20%, rgba(163, 166, 255, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(98, 250, 227, 0.1) 0%, transparent 40%),
+                radial-gradient(circle at 50% 50%, rgba(193, 128, 255, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 80% 10%, rgba(255, 110, 132, 0.05) 0%, transparent 30%);
+        }
+        .glass-card {
+            background: rgba(15, 25, 48, 0.6);
+            backdrop-filter: blur(40px);
+            border: 1px solid rgba(163, 166, 255, 0.1);
+        }
+        .input-glow:focus {
+            box-shadow: 0 0 15px rgba(163, 166, 255, 0.2);
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-body text-on-surface flex items-center justify-center min-h-screen p-6">
+<div class="mesh-gradient"></div>
+<!-- Background Decorative Elements -->
+<div class="fixed top-[-10%] right-[-5%] w-[500px] h-[500px] bg-secondary/10 blur-[120px] rounded-full"></div>
+<div class="fixed bottom-[-10%] left-[-5%] w-[400px] h-[400px] bg-tertiary/10 blur-[100px] rounded-full"></div>
+<main class="w-full max-w-lg z-10">
+<!-- Branding Header -->
+<header class="flex flex-col items-center mb-10">
+<div class="flex items-center gap-3 mb-2">
+<span class="material-symbols-outlined text-primary text-4xl" data-icon="sensors">sensors</span>
+<h1 class="font-headline font-black text-3xl tracking-tight text-primary drop-shadow-[0_0_12px_rgba(163,166,255,0.4)]">ClassPulse</h1>
+</div>
+<p class="text-on-surface-variant font-medium tracking-wide">THE DIGITAL OBSERVATORY</p>
+</header>
+<!-- Login Card -->
+<div class="glass-card p-10 lg:rounded-lg shadow-[0_20px_50px_rgba(0,0,0,0.5)] relative overflow-hidden">
+<!-- Verified Access Badge -->
+<div class="flex justify-center mb-8">
+<div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-secondary/10 border border-secondary/20">
+<span class="material-symbols-outlined text-secondary text-sm" data-icon="verified_user" style="font-variation-settings: 'FILL' 1;">verified_user</span>
+<span class="font-label text-[10px] font-bold uppercase tracking-[0.1em] text-secondary">Verified Access</span>
+</div>
+</div>
+<!-- Form Header -->
+<div class="text-center mb-10">
+<h2 class="font-headline text-2xl font-bold text-on-surface mb-2">Instructor Portal</h2>
+<p class="text-on-surface-variant text-sm">Secure biometric-ready entry for authorized educators</p>
+</div>
+<!-- Login Form -->
+<form class="space-y-6">
+<!-- Email/Username Field -->
+<div class="space-y-2">
+<label class="block text-xs font-bold uppercase tracking-widest text-on-surface-variant ml-1">Email or Username</label>
+<div class="relative group">
+<div class="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-outline text-lg group-focus-within:text-primary transition-colors" data-icon="alternate_email">alternate_email</span>
+</div>
+<input class="w-full bg-surface-container-lowest/40 border border-outline-variant/30 rounded-md py-4 pl-12 pr-4 text-on-surface placeholder:text-outline/50 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary input-glow transition-all font-medium" placeholder="educator@classpulse.edu" type="text"/>
+</div>
+</div>
+<!-- Password Field -->
+<div class="space-y-2">
+<div class="flex justify-between items-center ml-1">
+<label class="block text-xs font-bold uppercase tracking-widest text-on-surface-variant">Password</label>
+<a class="text-xs font-semibold text-secondary hover:text-secondary-fixed transition-colors" href="#">Forgot Password?</a>
+</div>
+<div class="relative group">
+<div class="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-outline text-lg group-focus-within:text-primary transition-colors" data-icon="lock">lock</span>
+</div>
+<input class="w-full bg-surface-container-lowest/40 border border-outline-variant/30 rounded-md py-4 pl-12 pr-12 text-on-surface placeholder:text-outline/50 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary input-glow transition-all font-medium" placeholder="••••••••••••" type="password"/>
+<div class="absolute inset-y-0 right-4 flex items-center cursor-pointer">
+<span class="material-symbols-outlined text-outline text-lg hover:text-on-surface" data-icon="visibility">visibility</span>
+</div>
+</div>
+</div>
+<!-- Login Button -->
+<button class="group relative w-full overflow-hidden rounded-md p-[1px] transition-all active:scale-[0.98]" type="submit">
+<div class="absolute inset-0 bg-gradient-to-r from-primary via-tertiary to-secondary animate-gradient-xy"></div>
+<div class="relative flex items-center justify-center gap-2 bg-surface-container-high hover:bg-transparent py-4 rounded-[calc(1.5rem-1px)] transition-all duration-300">
+<span class="font-headline font-bold text-on-surface tracking-wide group-hover:text-surface-container-lowest">Log in to Dashboard</span>
+<span class="material-symbols-outlined text-lg group-hover:text-surface-container-lowest" data-icon="arrow_forward">arrow_forward</span>
+</div>
+</button>
+</form>
+<!-- Secondary Options -->
+<div class="mt-10 flex flex-col items-center gap-4">
+<div class="flex items-center gap-3 w-full">
+<div class="h-[1px] flex-1 bg-outline-variant/20"></div>
+<span class="text-[10px] font-bold text-outline uppercase tracking-[0.2em]">External Auth</span>
+<div class="h-[1px] flex-1 bg-outline-variant/20"></div>
+</div>
+<div class="grid grid-cols-2 gap-4 w-full">
+<button class="flex items-center justify-center gap-2 bg-surface-container-low border border-outline-variant/10 rounded-md py-3 hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined text-primary text-xl" data-icon="fingerprint">fingerprint</span>
+<span class="text-xs font-bold text-on-surface-variant">Biometric</span>
+</button>
+<button class="flex items-center justify-center gap-2 bg-surface-container-low border border-outline-variant/10 rounded-md py-3 hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined text-secondary text-xl" data-icon="key">key</span>
+<span class="text-xs font-bold text-on-surface-variant">SSO</span>
+</button>
+</div>
+</div>
+<!-- Bottom decorative glow -->
+<div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-1/2 h-1 bg-gradient-to-r from-transparent via-primary/40 to-transparent blur-sm"></div>
+</div>
+<!-- System Status Footer -->
+<footer class="mt-8 flex justify-between items-center px-4">
+<div class="flex items-center gap-2">
+<div class="w-1.5 h-1.5 bg-secondary rounded-full shadow-[0_0_8px_rgba(98,250,227,0.8)]"></div>
+<span class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">System Operational</span>
+</div>
+<div class="flex gap-4">
+<a class="text-[10px] font-bold text-outline hover:text-primary uppercase tracking-widest transition-colors" href="#">Support</a>
+<a class="text-[10px] font-bold text-outline hover:text-primary uppercase tracking-widest transition-colors" href="#">Terms</a>
+</div>
+</footer>
+</main>
+<!-- Decorative Mesh Spheres -->
+<div class="fixed top-[15%] left-[10%] w-64 h-64 bg-primary/5 rounded-full blur-[80px]"></div>
+<div class="fixed bottom-[20%] right-[15%] w-80 h-80 bg-tertiary/5 rounded-full blur-[100px]"></div>
+</body></html>

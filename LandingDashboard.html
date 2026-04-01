@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "surface-container-lowest": "#000000",
+              "on-tertiary-fixed-variant": "#560094",
+              "tertiary": "#c180ff",
+              "surface-variant": "#192540",
+              "inverse-surface": "#faf8ff",
+              "on-secondary": "#005c52",
+              "on-primary-fixed-variant": "#0e009d",
+              "on-secondary-fixed-variant": "#00675c",
+              "primary-container": "#9396ff",
+              "on-tertiary-fixed": "#270048",
+              "secondary-container": "#006b5f",
+              "error-dim": "#d73357",
+              "outline": "#6d758c",
+              "on-tertiary-container": "#000000",
+              "on-tertiary": "#33005b",
+              "surface-bright": "#1f2b49",
+              "inverse-on-surface": "#4d556b",
+              "on-error": "#490013",
+              "error": "#ff6e84",
+              "tertiary-dim": "#9c48ea",
+              "secondary": "#62fae3",
+              "on-surface": "#dee5ff",
+              "on-error-container": "#ffb2b9",
+              "primary-dim": "#6063ee",
+              "surface-container-low": "#091328",
+              "outline-variant": "#40485d",
+              "on-primary": "#0f00a4",
+              "secondary-dim": "#50ebd5",
+              "secondary-fixed-dim": "#50ebd5",
+              "primary": "#a3a6ff",
+              "on-secondary-container": "#dcfff7",
+              "on-secondary-fixed": "#004840",
+              "surface-container": "#0f1930",
+              "background": "#060e20",
+              "tertiary-container": "#af5cfe",
+              "surface-container-high": "#141f38",
+              "on-primary-container": "#0a0081",
+              "tertiary-fixed-dim": "#c488ff",
+              "on-primary-fixed": "#000000",
+              "on-surface-variant": "#a3aac4",
+              "on-background": "#dee5ff",
+              "tertiary-fixed": "#ce9bff",
+              "surface-container-highest": "#192540",
+              "primary-fixed": "#9396ff",
+              "surface-dim": "#060e20",
+              "inverse-primary": "#494bd7",
+              "surface": "#060e20",
+              "surface-tint": "#a3a6ff",
+              "secondary-fixed": "#62fae3",
+              "error-container": "#a70138",
+              "primary-fixed-dim": "#8387ff"
+            },
+            fontFamily: {
+              "headline": ["Plus Jakarta Sans"],
+              "body": ["Inter"],
+              "label": ["Inter"]
+            },
+            borderRadius: {"DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        .mesh-gradient {
+            background-color: #060e20;
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(98, 250, 227, 0.15) 0px, transparent 50%),
+                radial-gradient(at 100% 0%, rgba(193, 128, 255, 0.15) 0px, transparent 50%),
+                radial-gradient(at 50% 100%, rgba(255, 110, 132, 0.1) 0px, transparent 50%);
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        input:focus {
+            outline: none !important;
+            box-shadow: none !important;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style></head>
+<body class="bg-background text-on-background font-body selection:bg-primary/30 min-h-[884px] overflow-x-hidden mesh-gradient" data-mode="connect" data-stitch-vh="min-h-[884px]===min-h-screen">
+<!-- Top Navigation Shell -->
+<header class="fixed top-0 w-full z-50 bg-[#060e20]/60 backdrop-blur-xl border-b border-[#ffffff1a] shadow-[0_4px_30px_rgba(0,0,0,0.1)] flex items-center justify-between px-6 h-20">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-3xl text-transparent bg-clip-text bg-gradient-to-br from-[#a3a6ff] to-[#62fae3] drop-shadow-[0_0_8px_rgba(163,166,255,0.6)]" data-icon="sensors">sensors</span>
+<span class="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-[#a3a6ff] to-[#62fae3] drop-shadow-[0_0_10px_rgba(163,166,255,0.4)] font-headline tracking-tight">ClassPulse</span>
+</div>
+<nav class="hidden md:flex items-center gap-8">
+<a class="font-['Plus_Jakarta_Sans'] font-bold tracking-tight text-[#a3a6ff] scale-105 transition-all duration-300" href="#">Explore</a>
+<a class="font-['Plus_Jakarta_Sans'] font-bold tracking-tight text-[#ffffffb3] hover:text-[#62fae3] transition-all duration-300" href="#">Sessions</a>
+<a class="font-['Plus_Jakarta_Sans'] font-bold tracking-tight text-[#ffffffb3] hover:text-[#62fae3] transition-all duration-300" href="#">Library</a>
+<a class="font-['Plus_Jakarta_Sans'] font-bold tracking-tight text-[#ffffffb3] hover:text-[#62fae3] transition-all duration-300" href="#">Profile</a>
+</nav>
+</header>
+<!-- Main Content Canvas -->
+<main class="relative pt-32 pb-20 px-4 max-w-4xl mx-auto flex flex-col items-center">
+<!-- Hero Branding -->
+<div class="text-center mb-12 relative">
+<div class="absolute -top-12 left-1/2 -translate-x-1/2 w-48 h-48 bg-primary/20 blur-[80px] rounded-full"></div>
+<span class="material-symbols-outlined text-7xl mb-4 block text-transparent bg-clip-text bg-gradient-to-br from-[#a3a6ff] to-[#62fae3] drop-shadow-[0_0_20px_rgba(163,166,255,0.6)]" data-icon="sensors">sensors</span>
+<h1 class="text-5xl md:text-7xl font-black font-headline tracking-tighter text-on-surface mb-4">
+                The Pulse of <br/>
+<span class="text-transparent bg-clip-text bg-gradient-to-r from-secondary via-primary to-tertiary">Real-Time Learning</span>
+</h1>
+</div>
+<!-- Mode Selection Bento-ish Stack -->
+<div class="w-full space-y-6">
+<!-- Interactive Student Join Section -->
+<div class="group w-full relative overflow-hidden transition-all duration-500">
+<div class="absolute inset-0 bg-gradient-to-br from-secondary/20 via-secondary/5 to-transparent opacity-60 transition-opacity duration-500"></div>
+<div class="relative bg-surface-container/40 backdrop-blur-2xl border border-secondary/30 rounded-lg p-8 flex flex-col items-center gap-8 shadow-[0_0_40px_rgba(98,250,227,0.15)] border-secondary/40">
+<div class="text-center space-y-2">
+<h2 class="text-3xl font-bold font-headline text-on-surface">Join a Session</h2>
+<p class="text-on-surface-variant text-sm">Enter the 4-digit code provided by your instructor</p>
+</div>
+<div class="flex flex-col items-center gap-6 w-full max-w-md">
+<div class="flex gap-3 md:gap-4 justify-center">
+<input class="w-16 h-20 md:w-20 md:h-24 bg-surface-container-highest/60 border-2 border-secondary/30 rounded-2xl text-center text-4xl font-black font-headline text-secondary focus:border-secondary transition-all selection:bg-transparent" maxlength="1" placeholder="•" type="text"/>
+<input class="w-16 h-20 md:w-20 md:h-24 bg-surface-container-highest/60 border-2 border-secondary/30 rounded-2xl text-center text-4xl font-black font-headline text-secondary focus:border-secondary transition-all selection:bg-transparent" maxlength="1" placeholder="•" type="text"/>
+<input class="w-16 h-20 md:w-20 md:h-24 bg-surface-container-highest/60 border-2 border-secondary/30 rounded-2xl text-center text-4xl font-black font-headline text-secondary focus:border-secondary transition-all selection:bg-transparent" maxlength="1" placeholder="•" type="text"/>
+<input class="w-16 h-20 md:w-20 md:h-24 bg-surface-container-highest/60 border-2 border-secondary/30 rounded-2xl text-center text-4xl font-black font-headline text-secondary focus:border-secondary transition-all selection:bg-transparent" maxlength="1" placeholder="•" type="text"/>
+</div>
+<button class="w-full py-4 bg-secondary text-on-secondary rounded-full font-black text-lg tracking-widest hover:scale-[1.02] active:scale-95 transition-all shadow-[0_0_30px_rgba(98,250,227,0.3)]">
+                        CONNECT NOW
+                    </button>
+</div>
+</div>
+</div>
+<!-- Restricted Teacher Mode Card -->
+<button class="group w-full text-left relative overflow-hidden transition-all duration-500 hover:bg-surface-container-highest/50 active:scale-[0.99] border-t border-[#ffffff0a]">
+<div class="relative bg-surface-container/20 backdrop-blur-xl border border-outline-variant/20 rounded-lg p-6 flex flex-col md:flex-row items-center md:items-start gap-6 transition-all">
+<div class="flex-shrink-0 w-14 h-14 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center group-hover:bg-primary/20 transition-colors duration-500">
+<span class="material-symbols-outlined text-2xl text-primary/60 group-hover:text-primary transition-colors duration-500" data-icon="lock">lock</span>
+</div>
+<div class="flex-grow space-y-1 text-center md:text-left flex flex-col justify-center">
+<div class="flex flex-col md:flex-row md:items-center gap-2">
+<h2 class="text-xl font-bold font-headline text-on-surface/80 group-hover:text-on-surface transition-colors">Instructor Login</h2>
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-primary/10 text-primary border border-primary/20 self-center md:self-auto uppercase tracking-tighter">Verified Access</span>
+</div>
+<p class="text-on-surface-variant/60 text-xs">Administrative portal for lesson management and analytics.</p>
+</div>
+<div class="flex-shrink-0 hidden md:flex items-center self-center">
+<span class="material-symbols-outlined text-xl text-outline-variant group-hover:text-primary transition-all translate-x-0 group-hover:translate-x-1" data-icon="login">login</span>
+</div>
+</div>
+</button>
+</div>
+<!-- Decorative Mesh Background Blobs -->
+<div class="fixed -bottom-32 -left-32 w-96 h-96 bg-tertiary/10 blur-[120px] rounded-full z-[-1]"></div>
+<div class="fixed top-1/2 -right-32 w-80 h-80 bg-secondary/10 blur-[100px] rounded-full z-[-1]"></div>
+</main>
+<script>
+    // Simple auto-tab logic for the 4-digit code inputs
+    const inputs = document.querySelectorAll('input[type="text"]');
+    inputs.forEach((input, index) => {
+        input.addEventListener('input', (e) => {
+            if (e.target.value.length === 1 && index < inputs.length - 1) {
+                inputs[index + 1].focus();
+            }
+        });
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Backspace' && !e.target.value && index > 0) {
+                inputs[index - 1].focus();
+            }
+        });
+    });
+</script>
+</body></html>

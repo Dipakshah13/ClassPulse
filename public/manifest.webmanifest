@@ -1,0 +1,17 @@
+{
+  "name": "ClassPulse",
+  "short_name": "ClassPulse",
+  "description": "Real-time classroom interaction ecosystem by Dipak Shah.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#050914",
+  "theme_color": "#62fae3",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
