@@ -48,7 +48,7 @@ const TeacherHistory = () => {
       <header className="max-w-6xl mx-auto mb-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="space-y-1">
           <div className="flex items-center gap-3">
-            <button 
+            <button
               onClick={() => navigate('/teacher/config')}
               className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white hover:bg-white/10 transition-all active:scale-90"
             >
@@ -81,7 +81,7 @@ const TeacherHistory = () => {
             <p className="text-on-surface-variant max-w-xs leading-relaxed">
               Once you complete your first live session, your analytical insights will appear here automatically.
             </p>
-            <button 
+            <button
               onClick={() => navigate('/teacher/config')}
               className="mt-8 px-10 py-4 rounded-2xl bg-primary text-black font-black uppercase tracking-widest text-xs shadow-lg shadow-primary/20 hover:scale-105 active:scale-95 transition-all"
             >
@@ -93,13 +93,13 @@ const TeacherHistory = () => {
             {history.map((session, idx) => {
               const successRate = calculateSuccess(session.feedback);
               return (
-                <div 
+                <div
                   key={idx}
                   className="glass-card group p-6 rounded-3xl border-white/5 hover:border-primary/20 hover:bg-white/5 transition-all duration-500 cursor-pointer relative overflow-hidden"
                   onClick={() => setSelectedSession(session)}
                 >
                   <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-3xl -mr-16 -mt-16 group-hover:bg-primary/10 transition-all" />
-                  
+
                   <div className="flex items-center justify-between mb-6 relative z-10">
                     <div className="flex flex-col">
                       <h3 className="text-white font-headline font-black text-xl tracking-tight line-clamp-1">
@@ -149,10 +149,10 @@ const TeacherHistory = () => {
                           {/* Background shadow circle */}
                           <circle cx="50%" cy="50%" r="40%" fill="none" strokeWidth="2" stroke="rgba(255,255,255,0.05)" />
                           {/* Success rate path */}
-                          <circle 
-                            cx="50%" cy="50%" r="40%" 
-                            fill="none" strokeWidth="3" 
-                            stroke={successRate > 70 ? '#62fae3' : successRate > 40 ? '#a3a6ff' : '#ff6e84'} 
+                          <circle
+                            cx="50%" cy="50%" r="40%"
+                            fill="none" strokeWidth="3"
+                            stroke={successRate > 70 ? '#62fae3' : successRate > 40 ? '#a3a6ff' : '#ff6e84'}
                             strokeDasharray={`${successRate}, 100`}
                             strokeLinecap="round"
                           />
@@ -194,7 +194,7 @@ const TeacherHistory = () => {
       {selectedSession && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/80 backdrop-blur-3xl p-6 animate-in fade-in duration-300">
           <div className="glass-panel w-full max-w-2xl max-h-[80vh] rounded-3xl p-8 overflow-y-auto relative animate-in zoom-in-95 duration-300 custom-scrollbar shadow-[0_0_100px_rgba(0,0,0,0.5)]">
-            <button 
+            <button
               onClick={() => setSelectedSession(null)}
               className="absolute top-6 right-6 w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white/40 hover:text-white transition-all hover:scale-110 active:scale-95"
             >
@@ -250,7 +250,7 @@ const TeacherHistory = () => {
                   {getHurdles(selectedSession.questions).map((h, i) => (
                     <div key={i} className="glass-card p-5 rounded-2xl border-rose-500/20 bg-rose-500/5 relative overflow-hidden group">
                       <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
-                         <span className="material-symbols-outlined text-6xl text-rose-400">history_edu</span>
+                        <span className="material-symbols-outlined text-6xl text-rose-400">history_edu</span>
                       </div>
                       <div className="flex items-center gap-3 mb-2">
                         <span className="w-2 h-2 rounded-full bg-rose-500 shadow-[0_0_8px_#ff6e84]" />

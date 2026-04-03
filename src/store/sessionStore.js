@@ -1,5 +1,5 @@
 import { generateInsight } from './aiInsightEngine';
-import { syncSessionToCloud } from '../services/classPulseService';
+import { syncSessionToCloud, sendLiveEvent, fetchLiveState } from '../services/classPulseService';
 
 // ── Identity State ──────────────────────────────────────────
 let teacherId = null; 
@@ -39,11 +39,14 @@ export function getFeedback() {
 }
 
 export function incrementFeedback(type) {
-  // type: 'gotIt' | 'sortOf' | 'lost'
+  const sessionId = localStorage.getItem(KEYS.SESSION_ID);
   const current = getFeedback();
   current[type] = (current[type] || 0) + 1;
   localStorage.setItem(KEYS.FEEDBACK, JSON.stringify(current));
   dispatch();
+
+  // Cloud Sync (Cross-device)
+  if (sessionId) sendLiveEvent(sessionId, 'feedback', type);
 }
 
 // ─── Reactions ──────────────────────────────────────────────────────────────
@@ -55,10 +58,14 @@ export function getReactions() {
 }
 
 export function incrementReaction(key) {
+  const sessionId = localStorage.getItem(KEYS.SESSION_ID);
   const current = getReactions();
   current[key] = (current[key] || 0) + 1;
   localStorage.setItem(KEYS.REACTIONS, JSON.stringify(current));
   dispatch();
+
+  // Cloud Sync (Cross-device)
+  if (sessionId) sendLiveEvent(sessionId, 'reaction', key);
 }
 
 // ─── Questions ──────────────────────────────────────────────────────────────
@@ -69,8 +76,9 @@ export function getQuestions() {
 }
 
 export function addQuestion(text) {
+  const sessionId = localStorage.getItem(KEYS.SESSION_ID);
   const questions = getQuestions();
-  const ai = generateInsight(text.trim()); // AI insight attached here
+  const ai = generateInsight(text.trim());
   const newQ = {
     id: Date.now(),
     text: text.trim(),
@@ -81,6 +89,9 @@ export function addQuestion(text) {
   questions.unshift(newQ);
   localStorage.setItem(KEYS.QUESTIONS, JSON.stringify(questions));
   dispatch();
+
+  // Cloud Sync (Cross-device)
+  if (sessionId) sendLiveEvent(sessionId, 'question', text.trim());
   return newQ;
 }
 
@@ -350,5 +361,49 @@ export function subscribe(callback) {
   return () => {
     window.removeEventListener('storage', handler);
     subscribers.delete(callback);
+  };
+}
+/**
+ * Start background polling for cross-device synchronization.
+ * Usually called by the teacher dashboard.
+ */
+let syncInterval = null;
+export function startCloudSync() {
+  const sessionId = localStorage.getItem(KEYS.SESSION_ID);
+  if (!sessionId || syncInterval) return;
+
+  console.log(`📡 Starting Cloud Pulse Sync for Session: ${sessionId}`);
+  
+  syncInterval = setInterval(async () => {
+    const freshState = await fetchLiveState(sessionId);
+    if (!freshState) return;
+
+    // Merge cloud state into local storage
+    if (freshState.feedback) {
+      localStorage.setItem(KEYS.FEEDBACK, JSON.stringify(freshState.feedback));
+    }
+    if (freshState.reactions) {
+      localStorage.setItem(KEYS.REACTIONS, JSON.stringify(freshState.reactions));
+    }
+    if (freshState.questions && freshState.questions.length > 0) {
+      // Map cloud questions to local format
+      const localQuestions = freshState.questions.map(q => ({
+        id: q.id,
+        text: q.text,
+        upvotes: q.upvotes || 0,
+        ts: q.created_at || new Date().toISOString(),
+        ai: q.ai_insight ? { insight: q.ai_insight } : null
+      }));
+      localStorage.setItem(KEYS.QUESTIONS, JSON.stringify(localQuestions));
+    }
+    
+    dispatch();
+  }, 4000); // Poll every 4s
+
+  return () => {
+    if (syncInterval) {
+      clearInterval(syncInterval);
+      syncInterval = null;
+    }
   };
 }

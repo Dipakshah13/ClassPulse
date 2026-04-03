@@ -48,7 +48,10 @@ const Landing = () => {
       <header className="fixed top-0 w-full z-50 bg-background/60 backdrop-blur-xl border-b border-outline/10 shadow-[0_4px_30px_rgba(0,0,0,0.1)] flex items-center justify-between px-6 h-20">
         <div className="flex items-center gap-2">
           <span className="material-symbols-outlined text-3xl text-transparent bg-clip-text bg-gradient-to-br from-primary to-secondary drop-shadow-[0_0_8px_rgba(163,166,255,0.6)]">sensors</span>
-          <span className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary drop-shadow-[0_0_10px_rgba(163,166,255,0.4)] font-headline tracking-tight">ClassPulse</span>
+          <div className="flex flex-col">
+            <span className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary drop-shadow-[0_0_10px_rgba(163,166,255,0.4)] font-headline tracking-tight leading-tight">ClassPulse</span>
+            <span className="text-[9px] font-black uppercase tracking-[0.3em] text-primary/60 -mt-0.5 select-none drop-shadow-[0_0_5px_rgba(163,166,255,0.3)]">by Dipak Shah</span>
+          </div>
         </div>
         <div className="flex items-center gap-4">
           <div className="flex flex-col items-end">
@@ -78,8 +81,12 @@ const Landing = () => {
         {/* Hero Branding */}
         <div className="text-center mb-12 relative">
           <div className="absolute -top-12 left-1/2 -translate-x-1/2 w-48 h-48 bg-primary/20 blur-[80px] rounded-full"></div>
-          <span className="material-symbols-outlined text-7xl mb-4 block text-transparent bg-clip-text bg-gradient-to-br from-primary to-secondary drop-shadow-[0_0_20px_rgba(163,166,255,0.6)]">sensors</span>
-          <h1 className="text-5xl md:text-7xl font-black font-headline tracking-tighter text-on-surface mb-4">
+          <span className="material-symbols-outlined text-7xl mb-1 block text-transparent bg-clip-text bg-gradient-to-br from-primary to-secondary drop-shadow-[0_0_20px_rgba(163,166,255,0.6)]">sensors</span>
+          <div className="flex flex-col items-center mb-6">
+            <h1 className="text-lg md:text-xl font-black font-headline tracking-[0.3em] md:tracking-[0.5em] text-on-surface-variant/40 uppercase -mb-1">ClassPulse</h1>
+            <span className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.3em] md:tracking-[0.4em] text-primary drop-shadow-[0_0_10px_rgba(163,166,255,0.5)]">by Dipak Shah</span>
+          </div>
+          <h1 className="text-4xl sm:text-5xl md:text-7xl font-black font-headline tracking-tighter text-on-surface mb-4 px-4">
             The Pulse of <br/>
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-secondary via-primary to-tertiary">Real-Time Learning</span>
           </h1>
@@ -101,7 +108,7 @@ const Landing = () => {
                     <input 
                       key={i}
                       ref={(el) => (inputsRef.current[i] = el)}
-                      className="w-16 h-20 md:w-20 md:h-24 bg-surface-container-highest/60 border-2 border-secondary/30 rounded-2xl text-center text-4xl font-black font-headline text-secondary focus:border-secondary transition-all selection:bg-transparent" 
+                      className="w-12 h-16 sm:w-16 sm:h-20 md:w-20 md:h-24 bg-surface-container-highest/60 border-2 border-secondary/30 rounded-2xl text-center text-3xl sm:text-4xl font-black font-headline text-secondary focus:border-secondary transition-all selection:bg-transparent" 
                       maxLength="1" 
                       placeholder="•" 
                       type="text"

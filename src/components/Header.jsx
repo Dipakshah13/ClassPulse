@@ -8,12 +8,12 @@ const Header = () => {
 
   return (
     <header className="bg-surface/80 backdrop-blur-xl docked full-width top-0 z-50 border-b border-outline shadow-[0px_10px_20px_rgba(0,0,0,0.05)] flex justify-between items-center px-6 py-4 w-full fixed transition-colors duration-500">
-      <Link to="/" className="flex flex-col items-start transition-transform active:scale-95">
-        <div className="flex items-center gap-2">
-          <span className="material-symbols-outlined text-primary text-xl" style={{ fontVariationSettings: "'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24" }}>sensors</span>
-          <h1 className="font-headline font-black tracking-tight text-xl text-primary leading-tight">ClassPulse</h1>
+      <Link to="/" className="flex flex-col items-start transition-transform active:scale-95 group flex-shrink-0">
+        <div className="flex items-center gap-1.5 md:gap-2">
+          <span className="material-symbols-outlined text-primary text-lg md:text-xl" style={{ fontVariationSettings: "'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24" }}>sensors</span>
+          <h1 className="font-headline font-black tracking-tight text-lg md:text-xl text-primary leading-tight">ClassPulse</h1>
         </div>
-        <span className="text-[9px] font-black uppercase tracking-[0.3em] text-on-surface-variant/40 ml-8 -mt-0.5">by Dipak Shah</span>
+        <span className="text-[7px] md:text-[9px] font-black uppercase tracking-[0.2em] md:tracking-[0.3em] text-primary/60 ml-6 md:ml-8 -mt-1 select-none drop-shadow-[0_0_5px_rgba(163,166,255,0.3)]">by Dipak Shah</span>
       </Link>
       
       <div className="flex items-center gap-3">

@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Header from './components/Header';
 import Dashboard from './components/Dashboard';
 import BottomNav from './components/BottomNav';
@@ -39,9 +39,9 @@ const SessionLayout = () => {
 };
 
 // Security Guard for Instructor-only routes
-const TeacherRoute = ({ children, auth, onLoginRedirect }) => {
+const TeacherRoute = ({ children, auth }) => {
   if (!auth.authenticated) {
-    return <InstructorLogin onAuthSuccess={onLoginRedirect} />; // Force login if not authorized
+    return <Navigate to="/teacher" replace />;
   }
   return children;
 };
@@ -53,8 +53,19 @@ function App() {
   useEffect(() => {
     // Restore session on load (especially useful for OAuth redirects)
     const restoreSession = async () => {
+      // 1. Safety Timeout to ensure UI always unlocks
+      const unlockTimer = setTimeout(() => setIsInitializing(false), 3000);
+
       try {
-        const { session } = await getCurrentSession();
+        const { session, error } = await getCurrentSession();
+        
+        // Handle 401/Unauthorized proactively
+        if (error?.status === 401 || error?.statusCode === 401) {
+          localStorage.removeItem('cp_instructor_auth');
+          setAuth({ authenticated: false });
+          return;
+        }
+
         if (session && session.user) {
           const authData = {
             authenticated: true,
@@ -63,29 +74,38 @@ function App() {
               id: session.user.id
             }
           };
-          // Sync our local auth state
-          localStorage.setItem('cp_instructor_auth', JSON.stringify(authData));
           setAuth(authData);
-          
-          // IMPORTANT: Inject the teacher ID into the global session store for cloud sync
-          const { setTeacherId } = await import('./store/sessionStore');
-          setTeacherId(session.user.id);
         } else {
-          // Check if we have a valid-ish local session but the server session is gone
-          const localAuth = JSON.parse(localStorage.getItem('cp_instructor_auth') || '{}');
-          if (localAuth.authenticated) {
+          // Fallback only if local data is complete AND fresh-ish
+          const stored = localStorage.getItem('cp_instructor_auth');
+          const localAuth = stored ? JSON.parse(stored) : null;
+          if (localAuth?.authenticated && localAuth?.user) {
             setAuth(localAuth);
+          } else if (localAuth?.authenticated) {
+            localStorage.removeItem('cp_instructor_auth');
           }
         }
       } catch (err) {
         console.error("Session restoration failed:", err);
       } finally {
-        // Add a slight delay for aesthetic "smoothness"
-        setTimeout(() => setIsInitializing(false), 800);
+        clearTimeout(unlockTimer);
+        // Minimal aesthetic delay
+        setTimeout(() => setIsInitializing(false), 600);
       }
     };
     restoreSession();
   }, []);
+
+  // Sync side effects whenever auth changes
+  useEffect(() => {
+    if (auth.authenticated && auth.user) {
+      localStorage.setItem('cp_instructor_auth', JSON.stringify(auth));
+      // Async sync of teacher ID to store
+      import('./store/sessionStore').then(({ setTeacherId }) => {
+        setTeacherId(auth.user.id);
+      }).catch(err => console.error("Store sync failed:", err));
+    }
+  }, [auth]);
 
   const handleManualAuth = (userData) => {
     setAuth({
@@ -104,17 +124,18 @@ function App() {
         <Routes>
           <Route path="/" element={<Landing />} />
           <Route path="/session/:sessionId" element={<SessionLayout />} />
-          <Route path="/teacher" element={<InstructorLogin onAuthSuccess={handleManualAuth} />} />
-          <Route path="/teacher/config" element={<TeacherRoute auth={auth} onLoginRedirect={handleManualAuth}><TeacherConfig /></TeacherRoute>} />
-          <Route path="/teacher/live" element={<TeacherRoute auth={auth} onLoginRedirect={handleManualAuth}><TeacherDashboard /></TeacherRoute>} />
-          <Route path="/teacher/history" element={<TeacherRoute auth={auth} onLoginRedirect={handleManualAuth}><TeacherHistory /></TeacherRoute>} />
-          <Route path="/teacher/:sessionId" element={<TeacherRoute auth={auth} onLoginRedirect={handleManualAuth}><TeacherDashboard /></TeacherRoute>} />
+          <Route path="/teacher" element={auth.authenticated ? <Navigate to="/teacher/config" replace /> : <InstructorLogin onAuthSuccess={handleManualAuth} />} />
+          <Route path="/teacher/config" element={<TeacherRoute auth={auth}><TeacherConfig /></TeacherRoute>} />
+          <Route path="/teacher/live" element={<TeacherRoute auth={auth}><TeacherDashboard /></TeacherRoute>} />
+          <Route path="/teacher/history" element={<TeacherRoute auth={auth}><TeacherHistory /></TeacherRoute>} />
+          <Route path="/teacher/:sessionId" element={<TeacherRoute auth={auth}><TeacherDashboard /></TeacherRoute>} />
         </Routes>
       </BrowserRouter>
       {/* Global Footer Credit */}
-      <footer className="w-full py-6 flex justify-center items-center opacity-30 select-none pointer-events-none">
-        <p className="text-[10px] font-black uppercase tracking-[0.4em] text-on-surface-variant text-center">
-          Designed & Developed by <span className="text-primary font-black">Dipak Shah</span>
+      <footer className="w-full py-8 flex justify-center items-center border-t border-white/5 mt-auto select-none">
+        <p className="text-[11px] font-black uppercase tracking-[0.4em] text-white/40 text-center flex flex-col sm:flex-row items-center gap-2">
+          <span>Designed & Developed by</span>
+          <span className="text-primary font-black drop-shadow-[0_0_10px_rgba(163,166,255,0.6)] px-2 py-0.5 rounded bg-primary/5 border border-primary/10">Dipak Shah</span>
         </p>
       </footer>
 

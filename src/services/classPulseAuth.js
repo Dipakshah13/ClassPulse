@@ -16,7 +16,8 @@ export async function verifyTeacherEmail(email, otp) {
     email,
     otp,
   });
-  return { user: data?.user, error };
+  const user = data?.user || data;
+  return { user: user || null, error };
 }
 
 /**
@@ -37,7 +38,8 @@ export async function signUpTeacher(email, password) {
     email,
     password,
   });
-  return { user: data?.user, requireEmailVerification: data?.requireEmailVerification, error };
+  const user = data?.user || data;
+  return { user, requireEmailVerification: data?.requireEmailVerification, error };
 }
 
 /**
@@ -48,7 +50,8 @@ export async function loginTeacher(email, password) {
     email,
     password,
   });
-  return { user: data?.user, error };
+  // Handle consistent return format
+  return { user: data?.user || data, error };
 }
 
 /**
@@ -71,12 +74,16 @@ export async function logoutTeacher() {
   return { error };
 }
 
-/**
- * Get the current session if it exists
- */
 export async function getCurrentSession() {
-  const { data, error } = await classPulse.auth.getCurrentSession();
-  return { session: data?.session, error };
+  try {
+    const { data, error } = await classPulse.auth.getCurrentUser();
+    // Return in a format that App.jsx expects (session.user)
+    // Handle both { data: user } and { data: { user } }
+    const user = data?.user || data;
+    return { session: user ? { user } : null, error };
+  } catch (err) {
+    return { session: null, error: err };
+  }
 }
 
 /**
@@ -92,12 +99,27 @@ export async function sendResetPasswordEmail(email) {
 /**
  * Reset User Password with OTP
  */
-export async function resetUserPassword(newPassword, otp) {
-  const { data, error } = await classPulse.auth.resetPassword({
-    newPassword,
-    otp,
-  });
-  return { data, error };
+export async function resetUserPassword(email, otp, newPassword) {
+  try {
+    // 1. Exchange the 6-digit code for a reset token
+    const { data: resetToken, error: exchangeError } = await classPulse.auth.exchangeResetPasswordToken({
+      email,
+      code: otp
+    });
+    
+    if (exchangeError) throw exchangeError;
+    if (!resetToken?.token) throw new Error("Invalid or expired reset token.");
+
+    // 2. Perform the actual password reset
+    const { data, error: resetError } = await classPulse.auth.resetPassword({
+      newPassword,
+      otp: resetToken.token
+    });
+
+    return { data, error: resetError };
+  } catch (err) {
+    return { data: null, error: err };
+  }
 }
 
 /**

@@ -6,7 +6,7 @@ import {
   getCurrentSessionId, resetForNewSession,
   getActivePoll, sendPoll as storeSendPoll, endPoll as storeEndPoll,
   getPinning, setPinning, getSettings,
-  subscribe, syncSession, updateQuestionAI, getBreaches
+  subscribe, syncSession, updateQuestionAI, getBreaches, startCloudSync
 } from '../store/sessionStore';
 import { sounds, getMuted, setMuted } from '../utils/soundService';
 import { getAIAnswer } from '../services/geminiService';
@@ -121,6 +121,14 @@ export default function TeacherDashboard() {
     const timer = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(timer);
   }, []);
+
+  // ── Cloud Pulse Sync: Cross-device real-time relay ──────────
+  useEffect(() => {
+    if (sessionId) {
+      const stopSync = startCloudSync();
+      return () => { if (stopSync) stopSync(); };
+    }
+  }, [sessionId]);
 
   // ── Live AI Brain: Process new questions automatically ──────────
   useEffect(() => {
@@ -490,12 +498,12 @@ END OF REPORT
 
       {/* ── Header ── */}
       <header className="fixed top-0 z-50 w-full flex justify-between items-center px-6 py-4 bg-surface/40 backdrop-blur-3xl border-b border-outline/10 shadow-xl">
-        <div className="flex flex-col items-start px-2">
-          <div className="flex items-center gap-2">
-            <span className="material-symbols-outlined text-primary text-xl">sensors</span>
-            <h1 className="font-['Plus_Jakarta_Sans'] font-black tracking-tight text-xl text-primary leading-tight">ClassPulse</h1>
+        <div className="flex flex-col items-start px-2 flex-shrink-0">
+          <div className="flex items-center gap-1.5 md:gap-2">
+            <span className="material-symbols-outlined text-primary text-lg md:text-xl">sensors</span>
+            <h1 className="font-['Plus_Jakarta_Sans'] font-black tracking-tight text-lg md:text-xl text-primary leading-tight">ClassPulse</h1>
           </div>
-          <span className="text-[8px] font-black uppercase tracking-[0.3em] text-on-surface-variant/30 ml-8 -mt-0.5">by Dipak Shah</span>
+          <span className="text-[7px] md:text-[8px] font-black uppercase tracking-[0.2em] md:tracking-[0.3em] text-on-surface-variant/30 ml-6 md:ml-8 -mt-0.5">by Dipak Shah</span>
         </div>
         <div className="flex items-center gap-4">
           <div className="relative group">
@@ -526,9 +534,13 @@ END OF REPORT
             <span className="material-symbols-outlined text-lg">history</span>
             <span className="text-[10px] font-black uppercase tracking-widest hidden sm:block">Insights</span>
           </button>
-          <div className="px-4 py-1.5 rounded-full bg-surface-bright/50 backdrop-blur-md flex items-center gap-2 border border-outline/10">
-            <span className="text-[10px] uppercase tracking-widest text-on-surface-variant font-bold leading-[1.1]">SESSION<br />CODE</span>
-            <span className="font-headline font-bold text-primary">{sessionId || '——'}</span>
+          <div className="px-3 md:px-4 py-1 md:py-1.5 rounded-full bg-surface-bright/50 backdrop-blur-md flex items-center gap-1.5 md:gap-2 border border-outline/10">
+            <span className="text-[8px] md:text-[10px] uppercase tracking-widest text-on-surface-variant font-bold leading-[1.1]">SESS<br className="sm:hidden" />ION</span>
+            <span className="font-headline font-bold text-primary text-sm md:text-base">{sessionId || '——'}</span>
+          </div>
+          <div className="hidden lg:flex items-center gap-2 pl-4 border-l border-white/10 select-none">
+            <span className="text-[9px] font-black uppercase tracking-[0.2em] text-white/20">by</span>
+            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-secondary drop-shadow-[0_0_8px_rgba(98,250,227,0.4)]">Dipak Shah</span>
           </div>
           <button onClick={() => { setPinned(p => !p); showToast(pinned ? 'Unpinned' : '📌 Session pinned!', 'info'); }}
             className={`material-symbols-outlined transition-all hover:scale-110 active:scale-95 ${pinned ? 'text-[#FACC15]' : 'text-on-surface-variant'}`}>
