@@ -80,6 +80,27 @@ export async function getCurrentSession() {
 }
 
 /**
+ * Send Password Reset Email
+ */
+export async function sendResetPasswordEmail(email) {
+  const { data, error } = await classPulse.auth.sendResetPasswordEmail({
+    email,
+  });
+  return { data, error };
+}
+
+/**
+ * Reset User Password with OTP
+ */
+export async function resetUserPassword(newPassword, otp) {
+  const { data, error } = await classPulse.auth.resetPassword({
+    newPassword,
+    otp,
+  });
+  return { data, error };
+}
+
+/**
  * Get current authenticated user
  */
 export async function getCurrentUser() {

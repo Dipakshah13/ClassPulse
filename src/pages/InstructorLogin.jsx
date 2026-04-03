@@ -3,14 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import { loginTeacher, signUpTeacher, verifyTeacherEmail, resendVerification, loginWithGoogle } from '../services/classPulseAuth';
 import { setTeacherId } from '../store/sessionStore';
 
-export default function InstructorLogin() {
+export default function InstructorLogin({ onAuthSuccess = () => {} }) {
   const navigate = useNavigate();
 
   const [email, setEmail]           = useState('');
   const [password, setPassword]     = useState('');
   const [showPass, setShowPass]     = useState(false);
   const [loading, setLoading]       = useState(false);
-  const [isScanning, setIsScanning] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
   const [isRegistering, setIsRegistering] = useState(false);
   const [otp, setOtp]               = useState('');
@@ -44,6 +43,7 @@ export default function InstructorLogin() {
           const { user: loggedInUser, error: loginErr } = await loginTeacher(trimmedEmail, password);
           if (loginErr) throw loginErr;
           setTeacherId(loggedInUser.id);
+          onAuthSuccess({ email: loggedInUser.email, id: loggedInUser.id });
           localStorage.setItem('cp_instructor_auth', JSON.stringify({
             authenticated: true,
             method: 'password',
@@ -62,6 +62,7 @@ export default function InstructorLogin() {
           throw loginErr;
         }
         setTeacherId(user.id);
+        onAuthSuccess({ email: user.email, id: user.id });
         localStorage.setItem('cp_instructor_auth', JSON.stringify({
           authenticated: true,
           method: 'password',
@@ -88,6 +89,7 @@ export default function InstructorLogin() {
       
       showToast('✅ Email Verified!');
       setTeacherId(user.id);
+      onAuthSuccess({ email: user.email, id: user.id });
       localStorage.setItem('cp_instructor_auth', JSON.stringify({
         authenticated: true,
         method: 'password',
@@ -111,20 +113,6 @@ export default function InstructorLogin() {
     }
   };
 
-  const handleBiometric = () => {
-    setIsScanning(true);
-    setTimeout(() => {
-      setIsScanning(false);
-      localStorage.setItem('cp_instructor_auth', JSON.stringify({
-        authenticated: true,
-        name: 'Authorized Instructor',
-        method: 'biometric',
-        loginTime: Date.now()
-      }));
-      showToast('✅ Identity Verified via Biometrics');
-      setTimeout(() => navigate('/teacher/config'), 800);
-    }, 2800);
-  };
 
   const handleGoogle = async () => {
     setIsConnecting(true);
@@ -138,42 +126,11 @@ export default function InstructorLogin() {
     }
   };
 
-  const handleForgot    = (e) => { e.preventDefault(); showToast('📧 Password reset email sent!'); };
+  const handleForgot    = (e) => { e.preventDefault(); sounds.alert?.(); showToast('📧 Password reset email sent!'); };
 
   return (
     <div className="mesh-bg font-body text-on-surface flex items-center justify-center min-h-screen p-6 overflow-x-hidden relative">
       
-      {/* ── Biometric Scanning Overlay ── */}
-      {isScanning && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-3xl animate-in fade-in duration-500">
-          <div className="flex flex-col items-center gap-10 max-w-xs text-center">
-            <div className="relative flex items-center justify-center">
-              {/* Outer Progress Ring */}
-              <svg className="w-40 h-40 rotate-[-90deg]">
-                <circle 
-                  cx="80" cy="80" r="70" 
-                  className="stroke-white/10 fill-none" 
-                  strokeWidth="4" 
-                />
-                <circle 
-                  cx="80" cy="80" r="70" 
-                  className="stroke-primary fill-none" 
-                  strokeWidth="4"
-                  strokeDasharray="440"
-                  style={{ animation: 'progress-dash 2.8s linear forwards' }}
-                />
-              </svg>
-              <div className="absolute w-24 h-24 rounded-full bg-primary/20 flex items-center justify-center shadow-[0_0_50px_rgba(163,166,255,0.4)] transition-all animate-biometric-pulse">
-                <span className="material-symbols-outlined text-5xl text-primary" style={{ fontVariationSettings: "'FILL' 1" }}>fingerprint</span>
-              </div>
-            </div>
-            <div className="space-y-2">
-              <h2 className="text-primary font-headline text-2xl font-black tracking-widest uppercase">Verifying ID</h2>
-              <p className="text-white/40 text-sm font-medium tracking-wide">Touch Sensor to Continue</p>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* ── Google Connecting Overlay ── */}
       {isConnecting && (
@@ -391,15 +348,7 @@ export default function InstructorLogin() {
               <span className="text-[10px] font-bold text-outline uppercase tracking-[0.2em]">External Auth</span>
               <div className="h-[1px] flex-1 bg-outline-variant/20" />
             </div>
-            <div className="grid grid-cols-2 gap-4 w-full">
-              <button
-                type="button"
-                onClick={handleBiometric}
-                className="flex items-center justify-center gap-2 bg-surface-container-low border border-outline-variant/10 rounded-md py-3 hover:bg-surface-container-high transition-colors active:scale-95 group/bio"
-              >
-                <span className="material-symbols-outlined text-primary text-xl group-hover/bio:scale-110 transition-transform">fingerprint</span>
-                <span className="text-xs font-bold text-on-surface-variant">Biometric</span>
-              </button>
+            <div className="grid grid-cols-1 gap-4 w-full">
               <button
                 type="button"
                 onClick={handleGoogle}

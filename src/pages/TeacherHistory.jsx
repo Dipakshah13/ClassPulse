@@ -28,6 +28,20 @@ const TeacherHistory = () => {
     });
   };
 
+  const getHurdles = (sessionQuestions) => {
+    if (!sessionQuestions || sessionQuestions.length === 0) return [];
+    const counts = {};
+    sessionQuestions.forEach(q => {
+      const topic = q.ai?.topic || 'General';
+      if (topic !== 'General') {
+        counts[topic] = (counts[topic] || 0) + 1;
+      }
+    });
+    return Object.entries(counts)
+      .filter(([topic, count]) => count >= 3)
+      .map(([topic, count]) => ({ topic, count }));
+  };
+
   return (
     <div className="min-h-screen dynamic-mesh p-8 md:p-12 pb-24">
       {/* Header Area */}
@@ -115,6 +129,12 @@ const TeacherHistory = () => {
                       <span className="text-on-surface-variant text-[10px] font-bold uppercase tracking-widest">
                         {formatDate(session.ts)}
                       </span>
+                      {getHurdles(session.questions).length > 0 && (
+                        <div className="mt-2 flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-rose-500/10 border border-rose-500/20 text-rose-400 text-[8px] font-black tracking-widest uppercase animate-pulse">
+                          <span className="material-symbols-outlined text-[10px]">priority_high</span>
+                          Hurdle Detected
+                        </div>
+                      )}
                     </div>
                   </div>
 
@@ -218,6 +238,33 @@ const TeacherHistory = () => {
                 <p className="text-[10px] font-bold text-rose-400/60 uppercase tracking-widest">Lost</p>
               </div>
             </div>
+
+            {/* ── Curriculum Intelligence Section ── */}
+            {getHurdles(selectedSession.questions).length > 0 && (
+              <div className="mb-10 space-y-4 animate-in slide-in-from-top-4 duration-500">
+                <div className="flex items-center gap-3 px-2">
+                  <span className="text-primary font-black text-[10px] uppercase tracking-[0.2em]">Curriculum Intelligence</span>
+                  <div className="h-px flex-1 bg-primary/10" />
+                </div>
+                <div className="grid grid-cols-1 gap-3">
+                  {getHurdles(selectedSession.questions).map((h, i) => (
+                    <div key={i} className="glass-card p-5 rounded-2xl border-rose-500/20 bg-rose-500/5 relative overflow-hidden group">
+                      <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+                         <span className="material-symbols-outlined text-6xl text-rose-400">history_edu</span>
+                      </div>
+                      <div className="flex items-center gap-3 mb-2">
+                        <span className="w-2 h-2 rounded-full bg-rose-500 shadow-[0_0_8px_#ff6e84]" />
+                        <h4 className="text-rose-400 font-headline font-black text-sm tracking-tight uppercase">Topic Hurdle: {h.topic}</h4>
+                        <span className="text-[10px] font-bold px-2 py-0.5 bg-rose-500/20 rounded-full text-rose-300">{h.count} Questions</span>
+                      </div>
+                      <p className="text-on-surface-variant text-xs leading-relaxed italic pr-12">
+                        <strong className="text-white not-italic">Pedagogical Advice:</strong> This topic was a major hurdle for this cohort. For your next class, consider adding more visual demos or a deeper drill-down to optimize the learning curve.
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             <div className="space-y-4">
               <div className="flex items-center gap-3 px-2">

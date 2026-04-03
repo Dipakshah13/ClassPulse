@@ -133,7 +133,7 @@ export default function TeacherConfig() {
     });
 
     // ── Audit feedback ──
-    sounds.startup();
+    sounds.startup?.();
 
     setTimeout(() => {
       setLaunching(false);

@@ -1,4 +1,5 @@
 {
+  "name": "classpulse",
   "rewrites": [
     {
       "source": "/(.*)",

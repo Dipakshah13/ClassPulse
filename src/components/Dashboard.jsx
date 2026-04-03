@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { incrementFeedback, incrementReaction, addQuestion, updateQuestionAI, getActivePoll, voteOnPoll, getPinning, getSettings, getCurrentSessionId, subscribe } from '../store/sessionStore';
+import { incrementFeedback, incrementReaction, addQuestion, updateQuestionAI, getActivePoll, voteOnPoll, getPinning, getSettings, getCurrentSessionId, subscribe, incrementBreaches } from '../store/sessionStore';
 import { getAIAnswer } from '../services/geminiService';
 import { sounds, getMuted } from '../utils/soundService';
 
@@ -174,6 +174,7 @@ const Dashboard = () => {
     const handleVisibility = () => {
       if (isPinned && document.visibilityState === 'hidden') {
         setFocusLost(true);
+        incrementBreaches(); // Notify teacher
       } else if (isPinned && document.visibilityState === 'visible' && focusLost) {
         // Vibrate to alert student upon return
         if (navigator.vibrate) navigator.vibrate([300, 100, 300]);
@@ -185,6 +186,7 @@ const Dashboard = () => {
       // If student EXITS fullscreen while teacher has pinned the class -> BREACH
       if (isPinned && !currentlyFs && !hasOverride) {
         setFocusLost(true);
+        incrementBreaches(); // Notify teacher
         if (navigator.vibrate) navigator.vibrate([400, 100, 400]);
       }
     };
@@ -204,6 +206,8 @@ const Dashboard = () => {
 
   // ── Send emoji reaction ─────────────────────────────────────────────────────
   const handleEmoji = (key) => {
+    if (isEnded) return;
+    if (!getMuted()) sounds.pop();
     incrementReaction(key);
     setReactionFlash(key);
     setTimeout(() => setReactionFlash(null), 600);
@@ -216,9 +220,10 @@ const Dashboard = () => {
 
     // 1. Save immediately → appears on teacher screen right away
     const newQ = addQuestion(questionText);
-    setQuestion('');
     setSent(true);
-    setTimeout(() => setSent(false), 2500);
+    setQuestion('');
+    if (!getMuted()) sounds.success(); // Rewarding chime
+    setTimeout(() => setSent(false), 3000);
 
     // 2. Mark as loading while Gemini is called
     updateQuestionAI(newQ.id, { geminiStatus: 'loading', geminiAnswer: null, geminiTip: null });
@@ -546,7 +551,7 @@ const Dashboard = () => {
           {EMOJIS.map(({ key, emoji }) => (
             <button
               key={key}
-              onClick={() => { handleEmoji(key); playSound('click'); }}
+              onClick={() => handleEmoji(key)}
               className={`w-14 h-14 flex items-center justify-center text-3xl rounded-2xl transition-all duration-150
                 ${reactionFlash === key ? 'emoji-active bg-white/10' : 'hover:bg-white/5 active:scale-110'}`}
             >

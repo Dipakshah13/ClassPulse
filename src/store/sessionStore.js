@@ -29,6 +29,7 @@ const KEYS = {
   SETTINGS: 'cp_settings',      // { geofencing: bool, hotspot: bool }
   THEME: 'cp_theme_mode',    // 'dark' | 'bright'
   HISTORY: 'cp_session_history', // Array<{ id, ts, feedback, reactions, questions }>
+  BREACHES: 'cp_breaches',     // Number: total focus breaches
 };
 // ─── Feedback ───────────────────────────────────────────────────────────────
 export function getFeedback() {
@@ -172,6 +173,19 @@ export function getPinning() {
 
 export function setPinning(enabled) {
   localStorage.setItem(KEYS.PINNING, String(enabled));
+  // Reset breaches on new sync
+  if (enabled) localStorage.setItem(KEYS.BREACHES, '0');
+  dispatch();
+}
+
+// ─── Breaches (Distraction Tracking) ──────────────────────────────────
+export function getBreaches() {
+  return Number(localStorage.getItem(KEYS.BREACHES)) || 0;
+}
+
+export function incrementBreaches() {
+  const current = getBreaches();
+  localStorage.setItem(KEYS.BREACHES, String(current + 1));
   dispatch();
 }
 
@@ -213,9 +227,21 @@ export function resetForNewSession(newSessionId, settings = {}) {
   localStorage.removeItem(KEYS.QUESTIONS);
   localStorage.removeItem(KEYS.POLL);
   localStorage.removeItem(KEYS.PINNING);
+  localStorage.removeItem(KEYS.BREACHES);
   localStorage.setItem(KEYS.SETTINGS, JSON.stringify(settings));
   if (newSessionId) localStorage.setItem(KEYS.SESSION_ID, String(newSessionId));
   dispatch();
+}
+
+/** 
+ * Used on Refresh: syncs the store identity to the URL ID 
+ * WITHOUT wiping the stored data.
+ */
+export function syncSession(sessionId) {
+  if (sessionId) {
+    localStorage.setItem(KEYS.SESSION_ID, String(sessionId));
+    dispatch();
+  }
 }
 
 // ─── History Retrieval ───────────────────────────────────────────
