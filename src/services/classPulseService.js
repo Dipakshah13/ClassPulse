@@ -37,7 +37,7 @@ export async function syncSessionToCloud(sessionData, vaultKey) {
     // 1. Sync Session Master
     const { error: sessionError } = await classPulse.database
       .from('class_sessions')
-      .insert({
+      .upsert({
         session_code: sessionData.id,
         subject: await safeEncrypt(sessionData.settings?.subject || 'Unnamed'),
         topic: await safeEncrypt(sessionData.settings?.topic || 'N/A'),
@@ -114,17 +114,34 @@ export async function sendLiveEvent(sessionId, type, data) {
 
     if (type === 'feedback') {
       table = 'class_metrics';
-      body = { ...body, got_it: data === 'got_it' ? 1 : 0, sort_of: data === 'sort_of' ? 1 : 0, lost: data === 'lost' ? 1 : 0 };
+      const isGotIt = (data === 'got_it' || data === 'gotIt');
+      const isSortOf = (data === 'sort_of' || data === 'sortOf');
+      const isLost = (data === 'lost');
+      body = { ...body, got_it: isGotIt ? 1 : 0, sort_of: isSortOf ? 1 : 0, lost: isLost ? 1 : 0 };
     } else if (type === 'reaction') {
       table = 'class_reactions';
       body = { ...body, bulb: data === 'bulb' ? 1 : 0, clap: data === 'clap' ? 1 : 0, fire: data === 'fire' ? 1 : 0, think: data === 'think' ? 1 : 0, mind: data === 'mind' ? 1 : 0 };
     } else if (type === 'question') {
       table = 'class_questions';
       body = { ...body, text: data, upvotes: 0 };
+    } else if (type === 'pinning') {
+      // Toggle master pinned state on the session anchor
+      const { error } = await classPulse.database.from('class_sessions')
+        .update({ is_pinned: !!data })
+        .eq('session_code', String(sessionId));
+      if (error) console.error('Pinning update error:', error);
+      return;
+    } else if (type === 'poll') {
+      table = 'class_polls';
+      body = { ...body, prompt: data.question, results: data.votes || { yes: 0, no: 0 }, is_active: true };
+    } else if (type === 'breach') {
+      table = 'class_metrics';
+      body = { ...body, breaches: 1 };
     }
 
     if (table) {
-      await classPulse.database.from(table).insert(body);
+      const { error } = await classPulse.database.from(table).insert(body);
+      if (error) console.error(`Insert to ${table} error:`, error);
     }
   } catch (e) {
     console.error('Failed to send live pulse:', e);
@@ -140,22 +157,27 @@ export async function fetchLiveState(sessionId) {
 
   try {
     // Parallel fetch using the SDK
-    const [metricsRes, reactionsRes, questionsRes] = await Promise.all([
+    const [metricsRes, reactionsRes, questionsRes, sessionRes, pollRes] = await Promise.all([
       classPulse.database.from('class_metrics').select('*').eq('session_id', sessionId),
       classPulse.database.from('class_reactions').select('*').eq('session_id', sessionId),
-      classPulse.database.from('class_questions').select('*').eq('session_id', sessionId).order('id', { ascending: false })
+      classPulse.database.from('class_questions').select('*').eq('session_id', sessionId).order('id', { ascending: false }),
+      classPulse.database.from('class_sessions').select('is_pinned').eq('session_code', sessionId).single(),
+      classPulse.database.from('class_polls').select('*').eq('session_id', sessionId).order('id', { ascending: false }).limit(1)
     ]);
 
     const metricsData = metricsRes.data || [];
     const reactionsData = reactionsRes.data || [];
     const questionsData = questionsRes.data || [];
+    const isPinned = sessionRes.data?.is_pinned || false;
+    const activePoll = pollRes.data?.[0] || null;
 
     // Aggregate Metrics
     const feedback = metricsData.reduce((acc, m) => ({
       gotIt: acc.gotIt + (m.got_it || 0),
       sortOf: acc.sortOf + (m.sort_of || 0),
-      lost: acc.lost + (m.lost || 0)
-    }), { gotIt: 0, sortOf: 0, lost: 0 });
+      lost: acc.lost + (m.lost || 0),
+      breaches: acc.breaches + (m.breaches || 0)
+    }), { gotIt: 0, sortOf: 0, lost: 0, breaches: 0 });
 
     // Aggregate Reactions
     const reactions = reactionsData.reduce((acc, r) => ({
@@ -166,9 +188,58 @@ export async function fetchLiveState(sessionId) {
       mind: acc.mind + (r.mind || 0)
     }), { bulb: 0, clap: 0, fire: 0, think: 0, mind: 0 });
 
-    return { feedback, reactions, questions: questionsData };
+    return { 
+      feedback, 
+      reactions, 
+      questions: questionsData,
+      isPinned,
+      activePoll: activePoll ? {
+        id: activePoll.id,
+        question: activePoll.prompt,
+        votes: activePoll.results,
+        status: activePoll.is_active ? 'active' : 'ended'
+      } : null
+    };
   } catch (e) {
     console.error('Failed to fetch cloud pulse:', e);
     return null;
+  }
+}
+/**
+ * Send a heartbeat to indicate the student is still active in the session.
+ * Uses a session-unique token stored in sessionStorage.
+ */
+export async function sendPresenceHeartbeat(sessionId) {
+  if (!CLASSPULSE_URL || !ANON_KEY || !sessionId) return;
+  try {
+    // Generate a persistent token for this browser tab
+    let token = sessionStorage.getItem('cp_student_token');
+    if (!token) {
+      token = Math.random().toString(36).slice(2) + Date.now().toString(36);
+      sessionStorage.setItem('cp_student_token', token);
+    }
+    await classPulse.database.from('class_presence').upsert(
+      { session_code: String(sessionId), student_token: token, last_seen: new Date().toISOString() },
+      { onConflict: 'session_code,student_token' }
+    );
+  } catch (e) {
+    // Silent fail - non-critical
+  }
+}
+
+/**
+ * Fetch the count of active students (seen in last 15 seconds).
+ */
+export async function fetchActiveStudentCount(sessionId) {
+  if (!CLASSPULSE_URL || !ANON_KEY || !sessionId) return 0;
+  try {
+    const cutoff = new Date(Date.now() - 15000).toISOString();
+    const { data } = await classPulse.database.from('class_presence')
+      .select('student_token')
+      .eq('session_code', String(sessionId))
+      .gte('last_seen', cutoff);
+    return data?.length || 0;
+  } catch (e) {
+    return 0;
   }
 }

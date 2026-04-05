@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { incrementFeedback, incrementReaction, addQuestion, updateQuestionAI, getActivePoll, voteOnPoll, getPinning, getSettings, getCurrentSessionId, subscribe, incrementBreaches } from '../store/sessionStore';
+import { incrementFeedback, incrementReaction, addQuestion, updateQuestionAI, getActivePoll, voteOnPoll, getPinning, getSettings, getCurrentSessionId, subscribe } from '../store/sessionStore';
 import { getAIAnswer } from '../services/geminiService';
 import { sounds, getMuted } from '../utils/soundService';
 
@@ -46,6 +46,7 @@ const Dashboard = () => {
   const [hasOverride, setHasOverride] = useState(false);
   const [lastCheckedSettings, setLastCheckedSettings] = useState(null);
   const [isFullScreen, setIsFullScreen] = useState(!!document.fullscreenElement);
+  const [cooldown, setCooldown] = useState(0); // feedback cooldown in seconds
 
   // ── Sync states from store ──────────────────────────────────────────────────
   useEffect(() => {
@@ -126,6 +127,12 @@ const Dashboard = () => {
           return;
         }
 
+        if (!navigator.geolocation) {
+          setLocationError('denied');
+          setVerifyingLocation(false);
+          return;
+        }
+        
         // 1. Geofencing check
         if (sessionSettings.geofencing && sessionSettings.originLocation) {
           try {
@@ -174,7 +181,6 @@ const Dashboard = () => {
     const handleVisibility = () => {
       if (isPinned && document.visibilityState === 'hidden') {
         setFocusLost(true);
-        incrementBreaches(); // Notify teacher
       } else if (isPinned && document.visibilityState === 'visible' && focusLost) {
         // Vibrate to alert student upon return
         if (navigator.vibrate) navigator.vibrate([300, 100, 300]);
@@ -186,7 +192,6 @@ const Dashboard = () => {
       // If student EXITS fullscreen while teacher has pinned the class -> BREACH
       if (isPinned && !currentlyFs && !hasOverride) {
         setFocusLost(true);
-        incrementBreaches(); // Notify teacher
         if (navigator.vibrate) navigator.vibrate([400, 100, 400]);
       }
     };
@@ -198,16 +203,25 @@ const Dashboard = () => {
     };
   }, [isPinned, focusLost, hasOverride]);
 
+  // ── Feedback Cooldown Timer ──────────────────────────────────────────
+  useEffect(() => {
+    if (cooldown <= 0) return;
+    const timer = setInterval(() => {
+      setCooldown(prev => Math.max(0, prev - 1));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [cooldown]);
+
   // ── Send feedback to the store ──────────────────────────────────────────────
   const handleFeedback = (type) => {
+    if (cooldown > 0) return; // Guard clause for cooldown
     setActiveFeedback(type);
     incrementFeedback(type); // 'gotIt' | 'sortOf' | 'lost'
+    setCooldown(30); // 30-second cooldown
   };
 
   // ── Send emoji reaction ─────────────────────────────────────────────────────
   const handleEmoji = (key) => {
-    if (isEnded) return;
-    if (!getMuted()) sounds.pop();
     incrementReaction(key);
     setReactionFlash(key);
     setTimeout(() => setReactionFlash(null), 600);
@@ -220,10 +234,9 @@ const Dashboard = () => {
 
     // 1. Save immediately → appears on teacher screen right away
     const newQ = addQuestion(questionText);
-    setSent(true);
     setQuestion('');
-    if (!getMuted()) sounds.success(); // Rewarding chime
-    setTimeout(() => setSent(false), 3000);
+    setSent(true);
+    setTimeout(() => setSent(false), 2500);
 
     // 2. Mark as loading while Gemini is called
     updateQuestionAI(newQ.id, { geminiStatus: 'loading', geminiAnswer: null, geminiTip: null });
@@ -491,14 +504,18 @@ const Dashboard = () => {
           {/* GOT IT */}
           <button
             onClick={() => handleFeedback('gotIt')}
-            className={`emerald-glass btn-wow h-40 rounded-3xl flex items-center justify-between px-8 group relative overflow-hidden
+            disabled={cooldown > 0}
+            className={`emerald-glass btn-wow h-32 md:h-40 rounded-3xl flex items-center justify-between px-6 md:px-8 group relative overflow-hidden transition-all duration-500
+            ${cooldown > 0 ? 'opacity-40 grayscale-[0.5] cursor-not-allowed scale-[0.98]' : ''}
             ${isActive('gotIt') ? 'ring-2 ring-emerald-400 scale-[1.02] shadow-[0_0_40px_rgba(16,185,129,0.3)] luminous-pulse' : 'opacity-80 hover:opacity-100 hover:scale-[1.01]'}`}
           >
             <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
             <div className="flex flex-col items-start text-left z-10 w-full">
-              <span className="text-emerald-400 font-headline font-black text-4xl tracking-tighter mb-1">GOT IT</span>
+              <span className="text-emerald-400 font-headline font-black text-3xl md:text-4xl tracking-tighter mb-1 uppercase">
+                {cooldown > 0 ? `WAIT ${cooldown}s` : 'GOT IT'}
+              </span>
               <p className="text-emerald-400/60 text-xs font-bold uppercase tracking-widest">
-                {isActive('gotIt') ? '✓ Synchronized' : 'High Clarity'}
+                {cooldown > 0 ? 'Cooldown Active' : isActive('gotIt') ? '✓ Synchronized' : 'High Clarity'}
               </p>
             </div>
             <div className={`flex-shrink-0 w-20 h-20 rounded-2xl flex items-center justify-center border transition-all duration-500
@@ -510,14 +527,18 @@ const Dashboard = () => {
           {/* SORT OF */}
           <button
             onClick={() => handleFeedback('sortOf')}
-            className={`amber-glass btn-wow h-40 rounded-3xl flex items-center justify-between px-8 group relative overflow-hidden
+            disabled={cooldown > 0}
+            className={`amber-glass btn-wow h-32 md:h-40 rounded-3xl flex items-center justify-between px-6 md:px-8 group relative overflow-hidden transition-all duration-500
+            ${cooldown > 0 ? 'opacity-40 grayscale-[0.5] cursor-not-allowed scale-[0.98]' : ''}
             ${isActive('sortOf') ? 'ring-2 ring-amber-400 scale-[1.02] shadow-[0_0_40px_rgba(245,158,11,0.3)] luminous-pulse' : 'opacity-80 hover:opacity-100 hover:scale-[1.01]'}`}
           >
             <div className="absolute inset-0 bg-gradient-to-br from-amber-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
             <div className="flex flex-col items-start text-left z-10 w-full">
-              <span className="text-amber-400 font-headline font-black text-4xl tracking-tighter mb-1">SORT OF</span>
+              <span className="text-amber-400 font-headline font-black text-3xl md:text-4xl tracking-tighter mb-1 uppercase">
+                {cooldown > 0 ? `WAIT ${cooldown}s` : 'SORT OF'}
+              </span>
               <p className="text-amber-400/60 text-xs font-bold uppercase tracking-widest">
-                {isActive('sortOf') ? '✓ Noted' : 'Partial Understanding'}
+                {cooldown > 0 ? 'Cooldown Active' : isActive('sortOf') ? '✓ Noted' : 'Partial Understanding'}
               </p>
             </div>
             <div className={`flex-shrink-0 w-20 h-20 rounded-2xl flex items-center justify-center border transition-all duration-500
@@ -529,14 +550,18 @@ const Dashboard = () => {
           {/* LOST */}
           <button
             onClick={() => handleFeedback('lost')}
-            className={`rose-glass btn-wow h-40 rounded-3xl flex items-center justify-between px-8 group relative overflow-hidden
+            disabled={cooldown > 0}
+            className={`rose-glass btn-wow h-32 md:h-40 rounded-3xl flex items-center justify-between px-6 md:px-8 group relative overflow-hidden transition-all duration-500
+            ${cooldown > 0 ? 'opacity-40 grayscale-[0.5] cursor-not-allowed scale-[0.98]' : ''}
             ${isActive('lost') ? 'ring-2 ring-rose-400 scale-[1.02] shadow-[0_0_40px_rgba(244,63,94,0.3)] luminous-pulse' : 'opacity-80 hover:opacity-100 hover:scale-[1.01]'}`}
           >
             <div className="absolute inset-0 bg-gradient-to-br from-rose-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
             <div className="flex flex-col items-start text-left z-10 w-full">
-              <span className="text-rose-400 font-headline font-black text-4xl tracking-tighter mb-1">LOST</span>
+              <span className="text-rose-400 font-headline font-black text-3xl md:text-4xl tracking-tighter mb-1 uppercase">
+                {cooldown > 0 ? `WAIT ${cooldown}s` : 'LOST'}
+              </span>
               <p className="text-rose-400/60 text-xs font-bold uppercase tracking-widest">
-                {isActive('lost') ? '✓ Alerted Teacher' : 'Requires Re-explanation'}
+                {cooldown > 0 ? 'Cooldown Active' : isActive('lost') ? '✓ Alerted Teacher' : 'Requires Re-explanation'}
               </p>
             </div>
             <div className={`flex-shrink-0 w-20 h-20 rounded-2xl flex items-center justify-center border transition-all duration-500
@@ -551,7 +576,7 @@ const Dashboard = () => {
           {EMOJIS.map(({ key, emoji }) => (
             <button
               key={key}
-              onClick={() => handleEmoji(key)}
+              onClick={() => { handleEmoji(key); playSound('click'); }}
               className={`w-14 h-14 flex items-center justify-center text-3xl rounded-2xl transition-all duration-150
                 ${reactionFlash === key ? 'emoji-active bg-white/10' : 'hover:bg-white/5 active:scale-110'}`}
             >

@@ -162,6 +162,21 @@ input:focus, textarea:focus {
   overflow: hidden;
 }
 
+/* ── Mobile Performance Optimization ── */
+@media (max-width: 768px) {
+  .blur-3xl {
+    filter: blur(24px) !important; /* Cap blur at a safer level for mobile GPUs */
+  }
+  .backdrop-blur-3xl {
+    backdrop-filter: blur(16px) !important;
+    -webkit-backdrop-filter: blur(16px) !important;
+  }
+  .mesh-bg {
+    background-image: none !important; /* Remove complex gradients on oldest devices if needed, but here we just simplify */
+    background: #060e20;
+  }
+}
+
 .mesh-blob {
     position: fixed;
     filter: blur(80px);

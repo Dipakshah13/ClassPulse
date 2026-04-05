@@ -10,11 +10,19 @@ let isMuted = localStorage.getItem('cp_muted') === 'true';
 
 const initAudio = () => {
   if (ctx) return;
-  const AudioContext = window.AudioContext || window.webkitAudioContext;
-  ctx = new AudioContext();
-  masterGain = ctx.createGain();
-  masterGain.connect(ctx.destination);
-  masterGain.gain.value = 0.15;
+  try {
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContext) {
+      console.warn("AudioContext not supported in this browser.");
+      return;
+    }
+    ctx = new AudioContext();
+    masterGain = ctx.createGain();
+    masterGain.connect(ctx.destination);
+    masterGain.gain.value = 0.15;
+  } catch (err) {
+    console.error("Failed to initialize AudioContext:", err);
+  }
 };
 
 const playTone = (freqs, type = 'sine', duration = 0.15, volume = 0.2) => {

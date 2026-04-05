@@ -8,6 +8,13 @@ export const classPulse = createClient({
   anonKey: ANON_KEY
 });
 
+// Debug: Verify credentials loading
+if (!CLASSPULSE_URL || !ANON_KEY) {
+  console.error("❌ CLASSPULSE CREDENTIALS MISSING! Check your .env file.");
+} else {
+  console.log("✅ ClassPulse Cloud Client Initialized:", CLASSPULSE_URL);
+}
+
 /**
  * Verify Teacher Email with 6-digit OTP
  */

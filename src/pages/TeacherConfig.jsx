@@ -5,7 +5,7 @@ import { sounds } from '../utils/soundService';
 
 const DURATIONS = [30, 45, 60, 90, 120];
 
-export default function TeacherConfig() {
+export default function TeacherConfig({ onLogout = () => {} }) {
   const navigate = useNavigate();
 
   // ── Form state ─────────────────────────────────────────────────────────────
@@ -133,7 +133,7 @@ export default function TeacherConfig() {
     });
 
     // ── Audit feedback ──
-    sounds.startup?.();
+    sounds.startup();
 
     setTimeout(() => {
       setLaunching(false);
@@ -168,33 +168,33 @@ export default function TeacherConfig() {
       )}
 
       {/* Top AppBar */}
-      <header className="fixed top-0 z-50 w-full bg-surface/40 backdrop-blur-2xl border-b border-outline/10 flex justify-between items-center px-6 py-5">
+      <header className="fixed top-0 z-50 w-full bg-surface/40 backdrop-blur-2xl border-b border-outline/10 flex justify-between items-center px-4 py-3 sm:px-6 sm:py-5">
         <div className="flex items-center gap-3">
           <div className="relative flex items-center justify-center">
             <span className="material-symbols-outlined text-secondary text-2xl">sensors</span>
             <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-secondary rounded-full animate-pulse shadow-[0_0_8px_rgba(98,250,227,0.8)]" />
           </div>
-          <h1 className="font-headline font-extrabold text-xl tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-primary via-white to-secondary">
+          <h1 className="font-headline font-extrabold text-lg sm:text-xl tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-primary via-white to-secondary">
             ClassPulse
           </h1>
         </div>
-        <div className="flex gap-3 items-center">
+        <div className="flex gap-2 sm:gap-3 items-center">
           <button 
             onClick={() => navigate('/teacher/history')}
             className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-white/10 bg-white/5 text-on-surface-variant hover:bg-white/10 active:scale-95 transition-all"
           >
             <span className="material-symbols-outlined text-sm">history</span>
-            <span className="text-[10px] font-bold tracking-widest uppercase">History</span>
+            <span className="text-[10px] font-bold tracking-widest uppercase hidden sm:block">History</span>
           </button>
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10">
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 whitespace-nowrap">
             <span className="w-1.5 h-1.5 rounded-full bg-secondary shadow-[0_0_6px_rgba(98,250,227,0.8)]" />
-            <span className="text-[10px] font-bold tracking-widest text-secondary/80 uppercase">Network</span>
+            <span className="text-[10px] font-bold tracking-widest text-secondary/80 uppercase hidden xs:block">Live</span>
           </div>
           <button
-            onClick={() => navigate('/teacher')}
-            className="text-[10px] font-bold text-outline hover:text-primary uppercase tracking-wider transition-colors"
+            onClick={() => { onLogout(); navigate('/teacher'); }}
+            className="text-[10px] font-bold text-outline hover:text-primary uppercase tracking-wider transition-colors px-2"
           >
-            ← Back
+            ← <span className="hidden sm:inline">Back</span>
           </button>
         </div>
       </header>
@@ -284,7 +284,7 @@ export default function TeacherConfig() {
               <div className="relative flex items-center gap-4">
                 <span
                   id="access-key"
-                  className={`font-headline text-6xl font-extrabold tracking-tighter transition-all duration-500
+                  className={`font-headline text-5xl sm:text-6xl font-extrabold tracking-tighter transition-all duration-500
                     ${keyRevealed ? 'text-white drop-shadow-[0_0_20px_rgba(255,255,255,0.4)]' : scrambling ? 'text-primary' : 'text-white/20'}`}
                 >
                   {sessionKey}

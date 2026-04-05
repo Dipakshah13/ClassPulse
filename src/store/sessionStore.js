@@ -38,6 +38,7 @@ export function getFeedback() {
   } catch { return { gotIt: 0, sortOf: 0, lost: 0 }; }
 }
 
+
 export function incrementFeedback(type) {
   const sessionId = localStorage.getItem(KEYS.SESSION_ID);
   const current = getFeedback();
@@ -183,10 +184,14 @@ export function getPinning() {
 }
 
 export function setPinning(enabled) {
+  const sessionId = localStorage.getItem(KEYS.SESSION_ID);
   localStorage.setItem(KEYS.PINNING, String(enabled));
   // Reset breaches on new sync
   if (enabled) localStorage.setItem(KEYS.BREACHES, '0');
   dispatch();
+
+  // Cloud Sync (Cross-device)
+  if (sessionId) sendLiveEvent(sessionId, 'pinning', enabled);
 }
 
 // ─── Breaches (Distraction Tracking) ──────────────────────────────────
@@ -195,9 +200,13 @@ export function getBreaches() {
 }
 
 export function incrementBreaches() {
+  const sessionId = localStorage.getItem(KEYS.SESSION_ID);
   const current = getBreaches();
   localStorage.setItem(KEYS.BREACHES, String(current + 1));
   dispatch();
+
+  // Cloud Sync (Cross-device)
+  if (sessionId) sendLiveEvent(sessionId, 'breach', 1);
 }
 
 // ─── Settings ───────────────────────────────────────────────────────────
@@ -369,36 +378,46 @@ export function subscribe(callback) {
  */
 let syncInterval = null;
 export function startCloudSync() {
-  const sessionId = localStorage.getItem(KEYS.SESSION_ID);
-  if (!sessionId || syncInterval) return;
+  if (syncInterval) return;
 
-  console.log(`📡 Starting Cloud Pulse Sync for Session: ${sessionId}`);
-  
   syncInterval = setInterval(async () => {
-    const freshState = await fetchLiveState(sessionId);
-    if (!freshState) return;
+    const sessionId = localStorage.getItem(KEYS.SESSION_ID);
+    if (!sessionId) return;
 
-    // Merge cloud state into local storage
-    if (freshState.feedback) {
-      localStorage.setItem(KEYS.FEEDBACK, JSON.stringify(freshState.feedback));
+    try {
+      const freshState = await fetchLiveState(sessionId);
+      if (!freshState) return;
+
+      // ── Sync Questions ──
+      if (freshState.questions) {
+        const localQuestions = freshState.questions.map(q => ({
+          id: q.id, text: q.text, upvotes: q.upvotes || 0,
+          ts: q.created_at || new Date().toISOString(),
+          ai: q.ai_insight ? { insight: q.ai_insight } : null
+        }));
+        localStorage.setItem(KEYS.QUESTIONS, JSON.stringify(localQuestions));
+      }
+      
+      // ── Sync Interactive Commands (Focus Mode & Polls) ──
+      if (Object.prototype.hasOwnProperty.call(freshState, 'isPinned')) {
+        localStorage.setItem(KEYS.PINNING, JSON.stringify(freshState.isPinned));
+      }
+      
+      if (freshState.feedback && typeof freshState.feedback.breaches === 'number') {
+        localStorage.setItem(KEYS.BREACHES, String(freshState.feedback.breaches));
+      }
+
+      if (freshState.activePoll) {
+        localStorage.setItem(KEYS.POLL, JSON.stringify(freshState.activePoll));
+      } else {
+        localStorage.removeItem(KEYS.POLL);
+      }
+
+      dispatch();
+    } catch (e) {
+      console.error('Cloud Sync Error:', e);
     }
-    if (freshState.reactions) {
-      localStorage.setItem(KEYS.REACTIONS, JSON.stringify(freshState.reactions));
-    }
-    if (freshState.questions && freshState.questions.length > 0) {
-      // Map cloud questions to local format
-      const localQuestions = freshState.questions.map(q => ({
-        id: q.id,
-        text: q.text,
-        upvotes: q.upvotes || 0,
-        ts: q.created_at || new Date().toISOString(),
-        ai: q.ai_insight ? { insight: q.ai_insight } : null
-      }));
-      localStorage.setItem(KEYS.QUESTIONS, JSON.stringify(localQuestions));
-    }
-    
-    dispatch();
-  }, 4000); // Poll every 4s
+  }, 2000); // Poll every 2s
 
   return () => {
     if (syncInterval) {
